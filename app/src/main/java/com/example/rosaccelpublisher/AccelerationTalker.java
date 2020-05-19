@@ -42,7 +42,7 @@ public class AccelerationTalker implements NodeMain {
                 float[] aValue =aListener.getSensorValue();
                 str.setData(java.lang.String.format("%f, %f, %f", aValue[0],aValue[1],aValue[2]));
                 publisher.publish(str);
-                Thread.sleep(1000);
+                Thread.sleep(500);
             }
         };
         node.executeCancellableLoop(aLoop);

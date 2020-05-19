@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 public class AccelerationListener implements SensorEventListener {
     private final Context context;
@@ -15,28 +16,57 @@ public class AccelerationListener implements SensorEventListener {
     }
 
     private float[] orientation = new float[]{0f, 0f, 0f};
-
+    private float[] mGravity = new float[3];
+    private float[] mGeomagnetic = new float[3];
+    private boolean newAValue = false;
+    private boolean newMValue = false;
     @Override
     public void onSensorChanged(SensorEvent event)
     {
-        float[] mGravity = new float[3];
-        float[] mGeomagnetic = new float[3];
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+        // Log.d("onSensorChanged", "Method called");
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             mGravity = event.values;
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = event.values;
-        float R[] =  new float[9];
-        float I[] =  new float[9];
-        boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-        if (success)
-        {
-            SensorManager.getOrientation(R, orientation);
+            /*
+            Log.d("onSensorChanged", "mGravity new value: " +
+                    String.valueOf(mGravity[0]) + " " +
+                    String.valueOf(mGravity[1]) + " " +
+                    String.valueOf(mGravity[2]) + " ");
+
+             */
+            newAValue=true;
         }
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            mGeomagnetic = event.values;
+            /*
+            Log.d("onSensorChanged", "mGeomagnetic new value: " +
+                    String.valueOf(mGeomagnetic[0]) + " " +
+                    String.valueOf(mGeomagnetic[1]) + " " +
+                    String.valueOf(mGeomagnetic[2]) + " ");
+                    */
+
+            newMValue=true;
+        }
+
+        if(newAValue && newMValue)
+        {
+            float R[] =  new float[9];
+            float I[] =  new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+            if (success)
+            {
+               // Log.d("onSensorChanged", "getRotationMatrix Success");
+                SensorManager.getOrientation(R, orientation);
+            }
+            newAValue=false;
+            newMValue=false;
+        }
+
 
     }
 
     public float[] getSensorValue()
     {
+       //Log.d("getSensorValue", String.valueOf(orientation[0]) + " " + String.valueOf(orientation[1]) + " " + String.valueOf(orientation[2]));
         return orientation;
     }
 
